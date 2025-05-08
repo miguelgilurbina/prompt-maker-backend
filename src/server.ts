@@ -2,12 +2,16 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import connectDB from './config/db'; // Asegúrate de que la ruta sea correcta
 
 // Cargar variables de entorno
 dotenv.config();
 
+// Conectar a la base de datos ANTES de definir cualquier ruta o iniciar el servidor
+connectDB();
+
 const app: Application = express();
-const PORT = process.env.PORT || 5001; // Puerto diferente al del frontend
+const PORT = process.env.PORT || 5001; 
 
 // Middlewares básicos
 app.use(cors()); // Habilitar CORS para permitir peticiones desde el frontend
