@@ -1,0 +1,6 @@
+# En tu backend/.gitignore (y frontend/.gitignore)
+node_modules/
+dist/
+.env
+*.log
+# y cualquier otra cosa que no deba subirse
