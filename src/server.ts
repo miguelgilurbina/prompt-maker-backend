@@ -11,7 +11,7 @@ dotenv.config();
 connectDB();
 
 const app: Application = express();
-const PORT = process.env.PORT || 5001; 
+const PORT = process.env.PORT || 5001;
 
 // Middlewares básicos
 app.use(cors()); // Habilitar CORS para permitir peticiones desde el frontend
