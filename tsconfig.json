@@ -9,7 +9,13 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true // Útil si importas archivos JSON
+  
   },
+
+  "paths": {
+      "@shared/*": ["../../shared/src/*"] // Navega dos niveles arriba para llegar a shared/
+    },
+  "baseUrl": "./src", // Para resolver rutas relativas dentro de src
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
