@@ -2,7 +2,9 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import connectDB from './config/db'; // Asegúrate de que la ruta sea correcta
+import connectDB from './config/db'; 
+import authRoutes from './routes/authRoutes';
+import promptRoutes from './routes/promptRoutes'; 
 
 // Cargar variables de entorno
 dotenv.config();
@@ -17,6 +19,11 @@ const PORT = process.env.PORT || 5001;
 app.use(cors()); // Habilitar CORS para permitir peticiones desde el frontend
 app.use(express.json()); // Para parsear JSON en el body de las peticiones
 app.use(express.urlencoded({ extended: true })); // Para parsear bodies URL-encoded
+
+
+// Rutas API
+app.use('/api/auth', authRoutes); // Rutas de autenticación
+app.use('/api/prompt', promptRoutes); // Rutas de prompts
 
 // Ruta de prueba
 app.get('/api/health', (req: Request, res: Response) => {

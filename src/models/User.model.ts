@@ -1,7 +1,7 @@
 // backend/src/models/User.model.ts
 import mongoose, { Schema, Document } from 'mongoose';
-// Aquí podrías importar bcryptjs si vas a añadir métodos de instancia para contraseñas
-// import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
+
 
 // Definimos la interfaz para el documento de Usuario, extendiendo Document de Mongoose
 export interface IUser extends Document {
@@ -12,7 +12,7 @@ export interface IUser extends Document {
   updatedAt: Date;
   // Futuro: roles, prompts creados, etc.
   // Opcional: método para comparar contraseñas
-  // comparePassword(candidatePassword: string): Promise<boolean>;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -28,14 +28,14 @@ const UserSchema: Schema<IUser> = new Schema(
       unique: true, // Asegura que no haya emails duplicados
       lowercase: true,
       trim: true,
-      // Opcional: validación de formato de email
-      // match: [/.+\@.+\..+/, 'Por favor, introduce un email válido.'],
+      // validación de formato de email
+      match: [/.+\@.+\..+/, 'Por favor, introduce un email válido.'],
     },
     passwordHash: {
       type: String,
       required: [true, 'La contraseña es obligatoria.'],
       // Opcional: seleccionar false para que no se devuelva por defecto en las queries
-      // select: false
+      select: false,
     },
   },
   {
@@ -58,9 +58,11 @@ const UserSchema: Schema<IUser> = new Schema(
 // });
 
 //  Método para comparar contraseñas
-// UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-//   return bcrypt.compare(candidatePassword, this.passwordHash);
-// };
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.passwordHash);
+};
 
 const User = mongoose.model<IUser>('User', UserSchema);
 export default User;

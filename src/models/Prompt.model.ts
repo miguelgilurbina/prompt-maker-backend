@@ -1,96 +1,39 @@
 // backend/src/models/Prompt.model.ts
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 // Importar el tipo de categoría del frontend para consistencia
-import { PromptCategory as FrontendPromptCategoryType } from '../../../frontend/src/lib/types/prompt'; // Ajusta la ruta
+import { Prompt } from '../../../shared/src/types/prompt.types'; // Ajusta la ruta
+import { PromptVariable } from '../../../shared/src/types/prompt.types';
 
-const validCategories: FrontendPromptCategoryType[] = [
-  'creative-writing',
-  'technical',
-  'business',
-  'academic',
-  'general',
-  'custom',
-];
-
-// Interfaz para las variables del Prompt
-export interface IPromptVariable {
-  // Mongoose no necesita un _id para subdocumentos a menos que lo queramos explícitamente como ObjectId
-  // id: string; // Este 'id' era para el frontend, en el backend Mongoose maneja _id para subdocs si es un array de Schemas.
-  // Si queremos un 'id' de negocio, podemos añadirlo. Por ahora, usaremos el 'name' como identificador único dentro del prompt.
-  name: string;
-  description?: string;
-  defaultValue?: string;
-  type: 'text' | 'number' | 'select' | 'multiline';
-  options?: string[];
+export interface IPrompt extends Document, Omit<Prompt, 'id' | 'categoryId'> {
+  userId: mongoose.Types.ObjectId;
+  categoryId?: mongoose.Types.ObjectId;
+  isPublic: boolean;
+  variables: PromptVariable[];
 }
 
-// Esquema para las variables del Prompt (será un array de estos)
-const PromptVariableSchema: Schema<IPromptVariable> = new Schema(
+const PromptVariableSchema: Schema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
-    defaultValue: { type: String, trim: true },
-    type: {
-      type: String,
-      required: true,
-      enum: ['text', 'number', 'select', 'multiline'],
-    },
-    options: [{ type: String }], // Array de strings para las opciones de 'select'
+    name: { type: String, required: true },
+    description: { type: String },
+    defaultValue: { type: Schema.Types.Mixed },
+    type: { type: String, enum: ['text', 'number', 'select'], default: 'text' },
+    options: [String], // Para variables de tipo 'select'
   },
   { _id: false }
-); // _id: false para que Mongoose no añada _id a cada variable
-
-export interface IPrompt extends Document {
-  title: string;
-  description?: string;
-  content: string;
-  tags: string[];
-  category: FrontendPromptCategoryType; // Tipo de categoría del frontend
-  variables: IPromptVariable[];
-  isTemplate?: boolean;
-  userId: Types.ObjectId; // Referencia al usuario que creó el prompt
-  // Futuro: isPublic, version, etc.
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const PromptSchema: Schema<IPrompt> = new Schema(
-  {
-    title: {
-      type: String,
-      required: [true, 'El título es obligatorio.'],
-      trim: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    content: {
-      type: String,
-      required: [true, 'El contenido del prompt es obligatorio.'],
-    },
-    tags: [{ type: String, trim: true, lowercase: true }],
-    category: {
-      type: String,
-      required: true,
-      enum: validCategories, // Usa los mismos valores que el frontend
-    },
-    variables: [PromptVariableSchema], // Array de subdocumentos
-    isTemplate: {
-      type: Boolean,
-      default: false,
-    },
-    userId: {
-      type: Schema.Types.ObjectId, // Tipo especial para IDs de Mongoose
-      ref: 'User', // Referencia al modelo 'User'
-      required: true,
-      index: true, // Buen candidato para un índice si buscas prompts por usuario
-    },
-  },
-  {
-    timestamps: true, // Añade createdAt y updatedAt
-  }
 );
 
-const Prompt = mongoose.model<IPrompt>('Prompt', PromptSchema);
-export default Prompt;
+const PromptSchema: Schema = new Schema(
+  {
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    description: { type: String },
+    variables: [PromptVariableSchema],
+    tags: [String],
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
+    isPublic: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model<IPrompt>('Prompt', PromptSchema);
