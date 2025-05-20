@@ -1,13 +1,24 @@
 // backend/src/controllers/promptController.ts
 import { Request, Response } from 'express';
-import Prompt, { IPrompt } from '../models/Prompt.model';
+import Prompt from '../models/Prompt.model';
 import mongoose from 'mongoose';
 
 // @desc    Crear un nuevo prompt
 // @access  Private
-export const createPrompt = async (req: Request, res: Response): Promise<void> => {
+export const createPrompt = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const { title, content, description, variables, tags, categoryId, isPublic } = req.body;
+    const {
+      title,
+      content,
+      description,
+      variables,
+      tags,
+      categoryId,
+      isPublic,
+    } = req.body;
 
     // Crear el nuevo prompt
     const newPrompt = new Prompt({
@@ -18,7 +29,7 @@ export const createPrompt = async (req: Request, res: Response): Promise<void> =
       tags: tags || [],
       userId: req.user?.id,
       categoryId: categoryId || null,
-      isPublic: isPublic || false
+      isPublic: isPublic || false,
     });
 
     const savedPrompt = await newPrompt.save();
@@ -31,26 +42,29 @@ export const createPrompt = async (req: Request, res: Response): Promise<void> =
 
 // @desc    Obtener todos los prompts del usuario
 // @access  Private
-export const getUserPrompts = async (req: Request, res: Response): Promise<void> => {
+export const getUserPrompts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     // Parámetros de paginación y filtrado
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
-    
+
     // Filtros opcionales
-    const filter: any = { userId: req.user?.id };
-    
+    const filter: Record<string, unknown> = { userId: req.user?.id };
+
     if (req.query.category) {
       filter.categoryId = req.query.category;
     }
-    
+
     if (req.query.search) {
       const searchRegex = new RegExp(req.query.search as string, 'i');
       filter.$or = [
         { title: searchRegex },
         { content: searchRegex },
-        { tags: searchRegex }
+        { tags: searchRegex },
       ];
     }
 
@@ -60,7 +74,7 @@ export const getUserPrompts = async (req: Request, res: Response): Promise<void>
       .limit(limit)
       .sort({ updatedAt: -1 }) // Más recientes primero
       .populate('categoryId', 'name');
-    
+
     const total = await Prompt.countDocuments(filter);
 
     res.json({
@@ -68,8 +82,8 @@ export const getUserPrompts = async (req: Request, res: Response): Promise<void>
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Get user prompts error:', error);
@@ -79,18 +93,24 @@ export const getUserPrompts = async (req: Request, res: Response): Promise<void>
 
 // @desc    Obtener un prompt específico
 // @access  Private (con comprobación para prompts públicos)
-export const getPromptById = async (req: Request, res: Response): Promise<void> => {
+export const getPromptById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const promptId = req.params.id;
-    
+
     // Validar que sea un ObjectId válido
     if (!mongoose.Types.ObjectId.isValid(promptId)) {
       res.status(400).json({ message: 'Invalid prompt ID' });
       return;
     }
 
-    const prompt = await Prompt.findById(promptId).populate('categoryId', 'name');
-    
+    const prompt = await Prompt.findById(promptId).populate(
+      'categoryId',
+      'name'
+    );
+
     if (!prompt) {
       res.status(404).json({ message: 'Prompt not found' });
       return;
@@ -111,11 +131,22 @@ export const getPromptById = async (req: Request, res: Response): Promise<void> 
 
 // @desc    Actualizar un prompt
 // @access  Private
-export const updatePrompt = async (req: Request, res: Response): Promise<void> => {
+export const updatePrompt = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const promptId = req.params.id;
-    const { title, content, description, variables, tags, categoryId, isPublic } = req.body;
-    
+    const {
+      title,
+      content,
+      description,
+      variables,
+      tags,
+      categoryId,
+      isPublic,
+    } = req.body;
+
     // Validar que sea un ObjectId válido
     if (!mongoose.Types.ObjectId.isValid(promptId)) {
       res.status(400).json({ message: 'Invalid prompt ID' });
@@ -124,7 +155,7 @@ export const updatePrompt = async (req: Request, res: Response): Promise<void> =
 
     // Encontrar el prompt y verificar la propiedad
     const prompt = await Prompt.findById(promptId);
-    
+
     if (!prompt) {
       res.status(404).json({ message: 'Prompt not found' });
       return;
@@ -140,21 +171,20 @@ export const updatePrompt = async (req: Request, res: Response): Promise<void> =
     // Actualizar prompt
     const updatedPrompt = await Prompt.findByIdAndUpdate(
       promptId,
-      { 
-        title, 
-        content, 
+      {
+        title,
+        content,
         description,
         variables,
         tags,
         categoryId,
-        isPublic
+        isPublic,
       },
       { new: true } // Devolver el documento actualizado
     );
 
     res.json(updatedPrompt);
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Update prompt error:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -162,10 +192,13 @@ export const updatePrompt = async (req: Request, res: Response): Promise<void> =
 
 // @desc    Eliminar un prompt
 // @access  Private
-export const deletePrompt = async (req: Request, res: Response): Promise<void> => {
+export const deletePrompt = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const promptId = req.params.id;
-    
+
     // Validar que sea un ObjectId válido
     if (!mongoose.Types.ObjectId.isValid(promptId)) {
       res.status(400).json({ message: 'Invalid prompt ID' });
@@ -174,7 +207,7 @@ export const deletePrompt = async (req: Request, res: Response): Promise<void> =
 
     // Encontrar el prompt y verificar la propiedad
     const prompt = await Prompt.findById(promptId);
-    
+
     if (!prompt) {
       res.status(404).json({ message: 'Prompt not found' });
       return;

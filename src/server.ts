@@ -2,9 +2,10 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import connectDB from './config/db'; 
+import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
-import promptRoutes from './routes/promptRoutes'; 
+import promptRoutes from './routes/promptRoutes';
+import categoryRoutes from './routes/categoryRoutes';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -20,10 +21,10 @@ app.use(cors()); // Habilitar CORS para permitir peticiones desde el frontend
 app.use(express.json()); // Para parsear JSON en el body de las peticiones
 app.use(express.urlencoded({ extended: true })); // Para parsear bodies URL-encoded
 
-
 // Rutas API
 app.use('/api/auth', authRoutes); // Rutas de autenticación
 app.use('/api/prompt', promptRoutes); // Rutas de prompts
+app.use('/api/categories', categoryRoutes); // Rutas de categorías
 
 // Ruta de prueba
 app.get('/api/health', (req: Request, res: Response) => {

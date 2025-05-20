@@ -26,11 +26,11 @@ export const auth = (req: Request, res: Response, next: NextFunction): void => {
   try {
     // Verificar token
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
-    
+
     // Agregar usuario al request
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ message: 'Token is not valid' });
   }
 };

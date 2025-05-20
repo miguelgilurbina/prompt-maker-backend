@@ -1,6 +1,12 @@
 // src/routes/promptRoutes.ts
 import { Router } from 'express';
-import { createPrompt, getUserPrompts, getPromptById, updatePrompt, deletePrompt } from '../controllers/promptController';
+import {
+  createPrompt,
+  getUserPrompts,
+  getPromptById,
+  updatePrompt,
+  deletePrompt,
+} from '../controllers/promptController';
 import { auth } from '../middlewares/auth';
 
 const router = Router();

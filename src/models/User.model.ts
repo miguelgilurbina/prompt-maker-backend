@@ -2,7 +2,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-
 // Definimos la interfaz para el documento de Usuario, extendiendo Document de Mongoose
 export interface IUser extends Document {
   name: string;

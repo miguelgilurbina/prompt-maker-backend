@@ -9,7 +9,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, name } = req.body;
 
-
     //Verificar si el usuario ya existe
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -23,7 +22,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const user = new User({
       email,
       passwordHash,
-      name
+      name,
     });
 
     await user.save();
@@ -41,7 +40,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: user._id,
         email: user.email,
-        name: user.name
+        name: user.name,
       },
     });
   } catch (error) {
@@ -76,8 +75,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: user._id,
         email: user.email,
-        name: user.name
-      }
+        name: user.name,
+      },
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -98,4 +97,3 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
