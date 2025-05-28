@@ -7,6 +7,9 @@ import authRoutes from './routes/authRoutes';
 import promptRoutes from './routes/promptRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import publicPromptRoutes from './routes/publicPromptRoutes';
+import { setupIndexes } from './config/setupDb';
+
+
 
 // Cargar variables de entorno
 dotenv.config();
@@ -14,6 +17,11 @@ dotenv.config();
 // Conexión con MongoDB Atlas
 
 connectDB();
+
+connectDB().then(() => {
+  setupIndexes();
+  console.log(`Backend server is running on http://localhost:${PORT}`);
+});
 
 const app: Application = express();
 const PORT = process.env.PORT || 5001;
