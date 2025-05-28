@@ -22,6 +22,15 @@ const PromptVariableSchema: Schema = new Schema(
   { _id: false }
 );
 
+const CommentSchema: Schema = new Schema(
+  {
+    text: { type: String, required: true },
+    authorName: { type: String, default: 'Anónimo' },
+    userId: { type: Schema.Types.ObjectId, ref: 'User' }, // Opcional
+  },
+  { timestamps: true }
+);
+
 const PromptSchema: Schema = new Schema(
   {
     title: { type: String, required: true },
@@ -32,6 +41,9 @@ const PromptSchema: Schema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
     isPublic: { type: Boolean, default: false },
+    votes: { type: Number, default: 0 },
+    voters: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Para tracking (opcional)
+    comments: [CommentSchema]
   },
   { timestamps: true }
 );

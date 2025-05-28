@@ -6,11 +6,13 @@ import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 import promptRoutes from './routes/promptRoutes';
 import categoryRoutes from './routes/categoryRoutes';
+import publicPromptRoutes from './routes/publicPromptRoutes';
 
 // Cargar variables de entorno
 dotenv.config();
 
-// Conectar a la base de datos ANTES de definir cualquier ruta o iniciar el servidor
+// Conexión con MongoDB Atlas
+
 connectDB();
 
 const app: Application = express();
@@ -25,6 +27,7 @@ app.use(express.urlencoded({ extended: true })); // Para parsear bodies URL-enco
 app.use('/api/auth', authRoutes); // Rutas de autenticación
 app.use('/api/prompt', promptRoutes); // Rutas de prompts
 app.use('/api/categories', categoryRoutes); // Rutas de categorías
+app.use('/api/public/prompts', publicPromptRoutes); // Rutas públicas de prompts
 
 // Ruta de prueba
 app.get('/api/health', (req: Request, res: Response) => {
