@@ -102,8 +102,12 @@ router.post('/:id/vote', async (req, res) => {
 });
 
 // Añadir a publicPromptRoutes.ts
+// En publicPromptRoutes.ts, actualizar el router.post('/', ...)
 router.post('/', async (req, res) => {
   try {
+    console.log('📡 POST /api/public/prompts - Request received');
+    console.log('Request body:', req.body);
+    
     const {
       title,
       content,
@@ -118,24 +122,33 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Title and content are required' });
     }
 
-    // Crear el nuevo prompt anónimo (público por defecto)
-    const newPrompt = new Prompt({
+    // Crear prompt anónimo (sin userId)
+    const promptData = {
       title,
       content,
-      description,
+      description: description || '',
       variables: variables || [],
       tags: tags || [],
-      // No asignamos userId, será nulo para prompts anónimos
-      categoryId: categoryId || null,
+      categoryId: categoryId || undefined, // null puede causar problemas
       isPublic: true, // Prompts anónimos son públicos
-      authorName: authorName || 'Anónimo' // Campo que necesitarías añadir al modelo
-    });
+      authorName: authorName || 'Anónimo',
+      // NO incluir userId - será undefined/null para prompts anónimos
+    };
 
+    console.log('🚀 Creating anonymous prompt with data:', promptData);
+
+    const newPrompt = new Prompt(promptData);
     const savedPrompt = await newPrompt.save();
+    
+    console.log('✅ Anonymous prompt saved:', savedPrompt._id);
     res.status(201).json(savedPrompt);
+    
   } catch (error) {
-    console.error('Create anonymous prompt error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('❌ ERROR creating prompt:', error);
+    res.status(500).json({ 
+      message: 'Server error',
+      error: (error instanceof Error ? error.message : String(error))
+    });
   }
 });
 
