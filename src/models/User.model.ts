@@ -42,19 +42,26 @@ const UserSchema: Schema<IUser> = new Schema(
   }
 );
 
-// Opcional: Middleware pre-save para hashear la contraseña antes de guardar
-// UserSchema.pre<IUser>('save', async function (next) {
-//   if (!this.isModified('passwordHash')) { // Solo hashear si la contraseña ha cambiado o es nueva
-//     return next();
-//   }
-//   try {
-//     const salt = await bcrypt.genSalt(10);
-//     this.passwordHash = await bcrypt.hash(this.passwordHash, salt); // Asumiendo que 'passwordHash' contenía la contraseña en texto plano temporalmente
-//     return next();
-//   } catch (err: any) { // Especificar 'any' o un tipo de error más específico
-//     return next(err);
-//   }
-// });
+// Middleware pre-save para hashear la contraseña antes de guardar
+UserSchema.pre<IUser>('save', async function (next) {
+  // Only hash the password if it has been modified (or is new)
+  if (!this.isModified('passwordHash')) {
+    return next();
+  }
+
+  try {
+    // Generate a salt
+    const salt = await bcrypt.genSalt(10);
+    // Hash the password with the salt
+    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+    return next();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return next(new Error(`Password hashing failed: ${error.message}`));
+    }
+    return next(new Error('Password hashing failed: Unknown error'));
+  }
+});
 
 //  Método para comparar contraseñas
 UserSchema.methods.comparePassword = async function (

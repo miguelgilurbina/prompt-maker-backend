@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import User, { IUser } from '../models/User.model';
+import User from '../models/User.model';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'defaultsecret';
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is not defined in environment variables');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,13 +17,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ message: 'User already exists' });
       return;
     }
-    // Hash de la contraseña
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
-    // Crear nuevo usuario
+    // Create new user - password hashing is handled by the pre-save hook in the model
     const user = new User({
       email,
-      passwordHash,
+      passwordHash: password, // This will be hashed by the pre-save hook
       name,
     });
 
@@ -60,7 +59,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Verificar contraseña
+    // Verify password using the model's method
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       res.status(400).json({ message: 'Invalid credentials' });

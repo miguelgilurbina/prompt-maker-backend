@@ -51,7 +51,7 @@ const PromptSchema: Schema = new Schema(
     isPublic: { type: Boolean, default: false },
     votes: { type: Number, default: 0 },
     voters: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    comments: [CommentSchema]
+    comments: [CommentSchema],
   },
   { timestamps: true }
 );

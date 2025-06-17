@@ -12,10 +12,19 @@ const connectDB = async () => {
       process.exit(1); // Salir del proceso con error
     }
 
-    await mongoose.connect(mongoURI);
-    // Opciones adicionales que Mongoose solía requerir ya no son necesarias en v6+
-    // como useNewUrlParser, useUnifiedTopology, useCreateIndex, useFindAndModify.
-    // Mongoose v6+ las maneja internamente.
+    console.log('Intentando conectar a MongoDB...');
+    await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 30000, // 30 seconds timeout
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+    });
+
+    mongoose.connection.on('connected', () => {
+      console.log('Mongoose conectado a la base de datos');
+    });
+
+    mongoose.connection.on('error', (err) => {
+      console.error('Error de conexión de Mongoose:', err);
+    });
 
     console.log('MongoDB Conectado Exitosamente.');
   } catch (error) {
